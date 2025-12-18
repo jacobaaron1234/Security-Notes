@@ -1,0 +1,11 @@
+Multiplex SSH command
+
+ssh -M -S /tmp/T1 -p2022 root@12.34.56.78
+
+ssh -S /temp/T1 dummy -O forward
+
+ssh -S /temp/T1 dummy -O cancel
+
+
+remove known hosts
+cat /dev/null > ~/.ssh/known_hosts
