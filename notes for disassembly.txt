@@ -1,0 +1,74 @@
+Notes on demo 1_new.exe
+
+static:
+.exe = executeable
+it is a MZ
+
+MZ = windows abbreviation for portable execcutable
+
+
+
+ELF is the exectuable for linux
+
+strings:
+
+enter key:
+Failed!!
+
+success!!.
+
+
+
+be sure to look if the file is packed or compressed like having upx at the top
+
+
+
+BEHAVIORAL:
+
+on opening "enter key:"
+
+typed "key" got "failed!!" message
+
+takes 5 seconds before window closes after failed!! message
+
+will not break with a lot of A's on this  prompt
+
+
+Dynamic:
+
+Yep, we did this
+
+
+
+Disassembly:
+
+running in gihdra
+
+made for x86 windows 32 bit 
+
+potentially made using visual studio
+
+
+disassembly takes user input 20bytes from standard input and converts it to integer. if input = 123, then it returns 13555, otherwise returns 12. I
+f returned value is 13555 it displays success if not it displays failed waits five seconds then exits.
+
+
+
+Static:
+demo2_new.exe
+
+made for x86, little Endian 
+
+Behavioral:
+"Enter Key" got success.
+
+"is not the Key" when incorrect.
+
+Dynamic:
+
+yup
+
+Disassembly:
+IVAR1 needs to = 65664 in order to get success message
+takes user input and compares it to stored data 'key' to set internal vairablt to 12 (failure) OR sucess (65664)
+
